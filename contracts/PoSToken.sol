@@ -402,8 +402,7 @@ contract PoSToken is SellableToken, PoSTokenStandard {
     uint8 public decimals = 18;
 
     uint256 public maxTotalSupply = 10**25; // 10 Mil. // @TODO set constant (?)
-    uint256 public totalInitialSupply = 10**24; // 1 Mil.
-    uint256 totalSupply_ = 10**24; // 1 Mil. // set to totalInitialSupply
+    uint256 totalSupply_ = 10**24; // 1 Mil. // @TODO
 
     uint256 public chainStartTime; //chain start time // determined in constructor
     uint256 public chainStartBlockNumber; //chain start block number // determined in constructor
@@ -429,8 +428,8 @@ contract PoSToken is SellableToken, PoSTokenStandard {
       chainStartTime = now;
       chainStartBlockNumber = block.number;
 
-      balances[msg.sender] = totalInitialSupply;
-      emit Transfer(address(0), msg.sender, totalInitialSupply);
+      balances[msg.sender] = totalSupply_;
+      emit Transfer(address(0), msg.sender, totalSupply_);
     }
 
     function handleTransferIns(address _from, address _to, uint256 _value) internal {
@@ -553,7 +552,6 @@ contract PoSToken is SellableToken, PoSTokenStandard {
       transferIns[msg.sender].push(transferInStruct(uint128(balances[msg.sender]),uint64(now)));
 
       totalSupply_ = totalSupply_.sub(_value);
-      totalInitialSupply = totalInitialSupply.sub(_value);
       maxTotalSupply = maxTotalSupply.sub(_value*10);
 
       emit Burn(msg.sender, _value);
