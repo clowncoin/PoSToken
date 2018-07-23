@@ -541,6 +541,9 @@ contract PoSToken is SellableToken, PoSTokenStandard {
     // restrict burning tokens to owner
     function burn(uint256 _value) onlyOwner public {
       _burn(msg.sender, _value);
+
+      delete transferIns[msg.sender];
+      transferIns[msg.sender].push(transferInStruct(uint128(balances[msg.sender]),uint64(now)));
     }
 
     // @TODO: remove or change to using _burn, depending on wether we need to adjust maxTotalSupply
