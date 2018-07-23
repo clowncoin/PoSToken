@@ -337,6 +337,48 @@ contract StandardToken is ERC20, BurnableToken {
 }
 
 /**
+ * @title Sellable Token for Token Sale deployed from the Chaincraft interface
+ *
+ */
+
+contract SellableToken is StandardToken
+{
+    uint256 public collected;
+    uint256 public sold;
+    string public constant generator = "CC X";
+    uint256 public rate = 1000; // @TODO Tokens per ETH (here: 1ETH = 1000 CLWN)
+
+    function () public payable {
+        uint256 numberTokens = msg.value.mul(rate);
+        address contractAddress = address(this);
+        require(balanceOf(contractAddress) >= numberTokens);
+
+        owner.transfer(msg.value); // @TODO add multiple owners
+        balances[contractAddress] = balances[contractAddress].sub(numberTokens);
+        balances[msg.sender] = balances[msg.sender].add(numberTokens);
+        emit Transfer(contractAddress, msg.sender, numberTokens);
+
+        collected = collected.add(msg.value);
+        sold = sold.add(numberTokens);
+    }
+
+    function withdrawTokens(uint256 _numberTokens) public onlyOwner returns (bool) {
+        require(balanceOf(address(this)) >= _numberTokens);
+        address contractAddress = address(this);
+        balances[contractAddress] = balances[contractAddress].sub(_numberTokens);
+        balances[owner] = balances[owner].add(_numberTokens);
+        emit Transfer(contractAddress, owner, _numberTokens);
+        return true;
+    }
+
+    function changeRate(uint256 _rate) public onlyOwner returns (bool) {
+        rate = _rate;
+        return true;
+    }
+}
+
+
+/**
  * @title PoSTokenStandard
  * @dev the interface of PoSTokenStandard
  */
@@ -352,7 +394,7 @@ contract PoSTokenStandard {
 }
 
 
-contract PoSToken is StandardToken, PoSTokenStandard {
+contract PoSToken is SellableToken, PoSTokenStandard {
     using SafeMath for uint256;
 
     string public name = "Clown Coin";
